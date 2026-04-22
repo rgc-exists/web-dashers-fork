@@ -6589,7 +6589,7 @@ class xs extends Phaser.Scene {
           "string",
         );
         if (localLevelString != null) {
-          this._doSearchInner(0);
+          await this._doSearchInner(0);
         } else {
           this._openLevelSelect();
         }
