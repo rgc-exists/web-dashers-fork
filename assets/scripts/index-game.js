@@ -6952,9 +6952,7 @@ class xs extends Phaser.Scene {
 
         let localLevelString = null;
         if (loadFromUrl) {
-          let localLevelString = new URLSearchParams(location.search).get(
-            "string",
-          );
+          localLevelString = new URLSearchParams(location.search).get("string");
           if (localLevelString != null) {
             localLevelString = String(localLevelString);
             loadFromUrl = true;
