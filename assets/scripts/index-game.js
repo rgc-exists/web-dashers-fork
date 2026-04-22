@@ -11257,10 +11257,11 @@ class xs extends Phaser.Scene {
       this._deltaBuffer = 0;
       return;
     }
-    if (autoCloseSearchMenu >= 0) {
+    if (autoCloseSearchMenu > 0) {
       autoCloseSearchMenu--;
       console.log(`autoCloseSearchMenu: ${autoCloseSearchMenu}`);
       if (autoCloseSearchMenu == 0) {
+        console.log(`closing search menu.`);
         autoCloseSearchMenu = false;
         const btn = this._searchOverlayObjects[2];
         btn.emit("pointerdown");
