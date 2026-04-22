@@ -6886,13 +6886,14 @@ class xs extends Phaser.Scene {
         );
         let localSongID = 0;
         if (localLevelString != null) {
-          let localLevelString = String(localLevelString);
+          localLevelString = String(localLevelString);
           loadFromUrl = true;
-          let localLevelString = Number(
+
+          localSongID = Number(
             new URLSearchParams(location.search).get("songID"),
           );
-          if (localLevelString == null) {
-            localLevelString = 0;
+          if (localSongID == null) {
+            localSongID = 0;
           }
         }
 
