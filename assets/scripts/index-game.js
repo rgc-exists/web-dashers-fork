@@ -45,6 +45,7 @@ function hexadecimalToHex(num) {
 
 let screenWidth = 1138;
 const screenHeight = 640;
+let hasLoadedFromURL = false;
 const a = 60;
 const o = 180;
 let centerX = screenWidth / 2 - 150;
@@ -7101,11 +7102,16 @@ class xs extends Phaser.Scene {
         typedLabel,
       ];
 
-      let localLevelString = new URLSearchParams(location.search).get("string");
-      if (localLevelString != null) {
-        _doSearch(true);
-      } else {
-        this._openLevelSelect();
+      if (!hasLoadedFromURL) {
+        let localLevelString = new URLSearchParams(location.search).get(
+          "string",
+        );
+        if (localLevelString != null) {
+          _doSearch(true);
+          hasLoadedFromURL = true;
+        } else {
+          this._openLevelSelect();
+        }
       }
     };
     this._closeSearchMenu = (silent = false) => {
