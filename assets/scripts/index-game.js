@@ -45,7 +45,6 @@ function hexadecimalToHex(num) {
 
 let screenWidth = 1138;
 const screenHeight = 640;
-let hasLoadedFromURL = false;
 const a = 60;
 const o = 180;
 let centerX = screenWidth / 2 - 150;
@@ -8989,13 +8988,6 @@ class xs extends Phaser.Scene {
         );
       }
       this._startGame();
-    }
-
-    let localLevelString = new URLSearchParams(location.search).get("string");
-    if (localLevelString != null) {
-      this._openSearchMenu();
-    } else {
-      this._openLevelSelect();
     }
   }
   _parseLevelColors(levelId) {
