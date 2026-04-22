@@ -6949,6 +6949,8 @@ class xs extends Phaser.Scene {
       };
       const _doSearchInner = async (levelId, loadFromUrl = false) => {
         let localSongID = 0;
+
+        let localLevelString = null;
         if (loadFromUrl) {
           let localLevelString = new URLSearchParams(location.search).get(
             "string",
