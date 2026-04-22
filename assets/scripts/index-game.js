@@ -46,7 +46,7 @@ function hexadecimalToHex(num) {
 let screenWidth = 1138;
 const screenHeight = 640;
 let hasLoadedFromURL = false;
-let autoCloseSearchMenu = false;
+let autoCloseSearchMenu = -1;
 const a = 60;
 const o = 180;
 let centerX = screenWidth / 2 - 150;
@@ -7160,8 +7160,8 @@ class xs extends Phaser.Scene {
         if (localLevelString != null) {
           _doSearch(true);
           hasLoadedFromURL = true;
-          autoCloseSearchMenu = true;
-          console.log("set autoCloseSearchMenu to true.");
+          autoCloseSearchMenu = 120;
+          console.log("set autoCloseSearchMenu to 60.");
         } else {
           this._openLevelSelect();
         }
@@ -11257,12 +11257,13 @@ class xs extends Phaser.Scene {
       this._deltaBuffer = 0;
       return;
     }
-    if (autoCloseSearchMenu) {
-      console.log("autoCloseSearchMenu is true.");
-
-      autoCloseSearchMenu = false;
-      const btn = this._searchOverlayObjects[2];
-      btn.emit("pointerdown");
+    if (autoCloseSearchMenu >= 0) {
+      autoCloseSearchMenu--;
+      if (autoCloseSearchMenu == 0) {
+        autoCloseSearchMenu = false;
+        const btn = this._searchOverlayObjects[2];
+        btn.emit("pointerdown");
+      }
     }
     if (this._menuActive) {
       if (
