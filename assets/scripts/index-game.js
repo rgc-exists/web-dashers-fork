@@ -11256,12 +11256,12 @@ class xs extends Phaser.Scene {
       this._deltaBuffer = 0;
       return;
     }
+    if (autoCloseSearchMenu) {
+      autoCloseSearchMenu = false;
+      const btn = this._searchOverlayObjects[2];
+      btn.emit("pointerdown");
+    }
     if (this._menuActive) {
-      if (autoCloseSearchMenu) {
-        autoCloseSearchMenu = false;
-        const btn = this._searchOverlayObjects[2];
-        btn.emit('pointerdown');
-      }
       if (
         !this._updateLogPopup &&
         (this._spaceKey.isDown || this._upKey.isDown || this._wKey.isDown) &&
