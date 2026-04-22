@@ -6585,14 +6585,7 @@ class xs extends Phaser.Scene {
       this._playBtn,
       1,
       () => {
-        let localLevelString = new URLSearchParams(location.search).get(
-          "string",
-        );
-        if (localLevelString != null) {
-          this._doSearchInner(0);
-        } else {
-          this._openLevelSelect();
-        }
+        this._openLevelSelect();
       },
       () =>
         this._menuActive && !this._playBtnPressed && !this._levelSelectOverlay,
@@ -6868,7 +6861,7 @@ class xs extends Phaser.Scene {
         statusText.setAlpha(1);
       };
       let _loading = false;
-      const _doSearch = async () => {
+      const _doSearch = async (loadFromUrl = false) => {
         if (_loading) return;
         const levelId = htmlInput.value.trim().replace(/\D/g, "");
         if (!levelId) {
@@ -6886,22 +6879,22 @@ class xs extends Phaser.Scene {
           _loading = false;
         }
       };
-      const _doSearchInner = async (levelId) => {
-        let loadFromUrl = false;
-
+      const _doSearchInner = async (levelId, loadFromUrl = false) => {
         let localSongID = 0;
-        let localLevelString = new URLSearchParams(location.search).get(
-          "string",
-        );
-        if (localLevelString != null) {
-          localLevelString = String(localLevelString);
-          loadFromUrl = true;
-
-          localSongID = Number(
-            new URLSearchParams(location.search).get("songID"),
+        if (loadFromUrl) {
+          let localLevelString = new URLSearchParams(location.search).get(
+            "string",
           );
-          if (localSongID == null) {
-            localSongID = 0;
+          if (localLevelString != null) {
+            localLevelString = String(localLevelString);
+            loadFromUrl = true;
+
+            localSongID = Number(
+              new URLSearchParams(location.search).get("songID"),
+            );
+            if (localSongID == null) {
+              localSongID = 0;
+            }
           }
         }
 
@@ -7094,6 +7087,13 @@ class xs extends Phaser.Scene {
         placeholderLabel,
         typedLabel,
       ];
+
+      let localLevelString = new URLSearchParams(location.search).get("string");
+      if (localLevelString != null) {
+        _doSearch(true);
+      } else {
+        this._openLevelSelect();
+      }
     };
     this._closeSearchMenu = (silent = false) => {
       if (!this._searchOverlay) return;
@@ -8974,6 +8974,13 @@ class xs extends Phaser.Scene {
         );
       }
       this._startGame();
+    }
+
+    let localLevelString = new URLSearchParams(location.search).get("string");
+    if (localLevelString != null) {
+      this._openSearchMenu();
+    } else {
+      this._openLevelSelect();
     }
   }
   _parseLevelColors(levelId) {
