@@ -6867,7 +6867,7 @@ class xs extends Phaser.Scene {
         if (loadFromUrl) {
           _loading = true;
           try {
-            await _doSearchInner(0);
+            await _doSearchInner(0, true);
           } catch (err) {
             console.error("search error:", err);
             _showStatus("error: " + err.message, "#ff5555");
