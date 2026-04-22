@@ -6601,6 +6601,7 @@ class xs extends Phaser.Scene {
       .setScale(1);
     this._creatorOverlay = null;
     this._creatorOverlayObjects = null;
+    this._searchOverlayObjects = null;
 
     this._openCreatorMenu = () => {
       if (this._creatorOverlay) return;
@@ -11258,7 +11259,7 @@ class xs extends Phaser.Scene {
     if (this._menuActive) {
       if (autoCloseSearchMenu) {
         autoCloseSearchMenu = false;
-        const btn = _searchOverlayObjects[2];
+        const btn = this._searchOverlayObjects[2];
         btn.click();
       }
       if (
