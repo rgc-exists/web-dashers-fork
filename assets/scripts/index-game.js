@@ -6863,20 +6863,33 @@ class xs extends Phaser.Scene {
       let _loading = false;
       const _doSearch = async (loadFromUrl = false) => {
         if (_loading) return;
-        const levelId = htmlInput.value.trim().replace(/\D/g, "");
-        if (!levelId) {
-          _showStatus("enter a level id", "#ff6666", 3000);
 
-          return;
-        }
-        _loading = true;
-        try {
-          await _doSearchInner(levelId);
-        } catch (err) {
-          console.error("search error:", err);
-          _showStatus("error: " + err.message, "#ff5555");
-        } finally {
-          _loading = false;
+        if (loadFromUrl) {
+          _loading = true;
+          try {
+            await _doSearchInner(0);
+          } catch (err) {
+            console.error("search error:", err);
+            _showStatus("error: " + err.message, "#ff5555");
+          } finally {
+            _loading = false;
+          }
+        } else {
+          const levelId = htmlInput.value.trim().replace(/\D/g, "");
+          if (!levelId) {
+            _showStatus("enter a level id", "#ff6666", 3000);
+
+            return;
+          }
+          _loading = true;
+          try {
+            await _doSearchInner(levelId);
+          } catch (err) {
+            console.error("search error:", err);
+            _showStatus("error: " + err.message, "#ff5555");
+          } finally {
+            _loading = false;
+          }
         }
       };
       const _doSearchInner = async (levelId, loadFromUrl = false) => {
