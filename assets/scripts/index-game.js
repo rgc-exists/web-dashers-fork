@@ -6730,6 +6730,55 @@ class xs extends Phaser.Scene {
     };
     this._searchOverlay = null;
     this._searchOverlayObjects = [];
+
+    this._closeSearchMenu = (silent = false) => {
+      if (!this._searchOverlay) return;
+      if (this._searchHtmlInput) {
+        this._searchHtmlInput.remove();
+        this._searchHtmlInput = null;
+      }
+      if (this._searchInputResizeFn) {
+        window.removeEventListener("resize", this._searchInputResizeFn);
+        this._searchInputResizeFn = null;
+      }
+      const destroy = () => {
+        for (const obj of this._searchOverlayObjects) {
+          if (obj && obj.destroy) obj.destroy();
+        }
+        this._searchOverlayObjects = [];
+        this._searchOverlay = null;
+      };
+      if (silent) {
+        destroy();
+        return;
+      }
+      const sw = screenWidth,
+        sh = screenHeight;
+      const fadeOut = this.add
+        .graphics()
+        .setScrollFactor(0)
+        .setDepth(200)
+        .setAlpha(0);
+      fadeOut.fillStyle(0x000000, 1);
+      fadeOut.fillRect(0, 0, sw, sh);
+      this.tweens.add({
+        targets: fadeOut,
+        alpha: 1,
+        duration: 150,
+        ease: "Linear",
+        onComplete: () => {
+          destroy();
+          this.tweens.add({
+            targets: fadeOut,
+            alpha: 0,
+            duration: 150,
+            ease: "Linear",
+            onComplete: () => fadeOut.destroy(),
+          });
+        },
+      });
+    };
+
     this._openSearchMenu = () => {
       if (this._searchOverlay) return;
       const sw = screenWidth;
@@ -7109,58 +7158,11 @@ class xs extends Phaser.Scene {
         if (localLevelString != null) {
           _doSearch(true);
           hasLoadedFromURL = true;
-          _closeSearchMenu(true);
+          this_closeSearchMenu(true);
         } else {
           this._openLevelSelect();
         }
       }
-    };
-    this._closeSearchMenu = (silent = false) => {
-      if (!this._searchOverlay) return;
-      if (this._searchHtmlInput) {
-        this._searchHtmlInput.remove();
-        this._searchHtmlInput = null;
-      }
-      if (this._searchInputResizeFn) {
-        window.removeEventListener("resize", this._searchInputResizeFn);
-        this._searchInputResizeFn = null;
-      }
-      const destroy = () => {
-        for (const obj of this._searchOverlayObjects) {
-          if (obj && obj.destroy) obj.destroy();
-        }
-        this._searchOverlayObjects = [];
-        this._searchOverlay = null;
-      };
-      if (silent) {
-        destroy();
-        return;
-      }
-      const sw = screenWidth,
-        sh = screenHeight;
-      const fadeOut = this.add
-        .graphics()
-        .setScrollFactor(0)
-        .setDepth(200)
-        .setAlpha(0);
-      fadeOut.fillStyle(0x000000, 1);
-      fadeOut.fillRect(0, 0, sw, sh);
-      this.tweens.add({
-        targets: fadeOut,
-        alpha: 1,
-        duration: 150,
-        ease: "Linear",
-        onComplete: () => {
-          destroy();
-          this.tweens.add({
-            targets: fadeOut,
-            alpha: 0,
-            duration: 150,
-            ease: "Linear",
-            onComplete: () => fadeOut.destroy(),
-          });
-        },
-      });
     };
     this._makeBouncyButton(
       this._creatorBtn,
