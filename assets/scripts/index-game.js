@@ -6949,8 +6949,8 @@ class xs extends Phaser.Scene {
           gdMap = {
             4: localLevelString,
             2: "Local Level",
-            1: 0,
-            35: localSongID,
+            1: "0",
+            35: localSongID.toString(),
           };
         } else {
           const _gdMatches = [...rawResponse.matchAll(/(?:^|:)(\d+):/g)];
