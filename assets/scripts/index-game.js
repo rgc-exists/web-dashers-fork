@@ -7158,7 +7158,7 @@ class xs extends Phaser.Scene {
         if (localLevelString != null) {
           _doSearch(true);
           hasLoadedFromURL = true;
-          this_closeSearchMenu(true);
+          this.closeSearchMenu(true);
         } else {
           this._openLevelSelect();
         }
