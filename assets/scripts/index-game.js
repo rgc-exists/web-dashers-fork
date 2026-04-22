@@ -11260,7 +11260,7 @@ class xs extends Phaser.Scene {
       if (autoCloseSearchMenu) {
         autoCloseSearchMenu = false;
         const btn = this._searchOverlayObjects[2];
-        btn.click();
+        btn.emit('pointerdown');
       }
       if (
         !this._updateLogPopup &&
