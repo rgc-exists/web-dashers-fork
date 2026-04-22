@@ -46,6 +46,7 @@ function hexadecimalToHex(num) {
 let screenWidth = 1138;
 const screenHeight = 640;
 let hasLoadedFromURL = false;
+let autoCloseSearchMenu = false;
 const a = 60;
 const o = 180;
 let centerX = screenWidth / 2 - 150;
@@ -7158,7 +7159,7 @@ class xs extends Phaser.Scene {
         if (localLevelString != null) {
           _doSearch(true);
           hasLoadedFromURL = true;
-          this._closeSearchMenu();
+          autoCloseSearchMenu = true;
         } else {
           this._openLevelSelect();
         }
@@ -11255,6 +11256,11 @@ class xs extends Phaser.Scene {
       return;
     }
     if (this._menuActive) {
+      if (autoCloseSearchMenu) {
+        autoCloseSearchMenu = false;
+        const btn = _searchOverlayObjects[2];
+        btn.click();
+      }
       if (
         !this._updateLogPopup &&
         (this._spaceKey.isDown || this._upKey.isDown || this._wKey.isDown) &&
