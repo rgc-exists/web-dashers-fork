@@ -7050,6 +7050,7 @@ class xs extends Phaser.Scene {
           window._onlineSongBuffer = null;
           window._onlineSongKey = null;
           try {
+            const PROXY_BASE = (window._gdProxyUrl || "").replace(/\/$/, "");
             const ngRes = await fetch(`${PROXY_BASE}/getGJSongInfo.php`, {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
