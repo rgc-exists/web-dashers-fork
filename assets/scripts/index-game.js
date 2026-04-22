@@ -6585,7 +6585,14 @@ class xs extends Phaser.Scene {
       this._playBtn,
       1,
       () => {
-        this._openLevelSelect();
+        let localLevelString = new URLSearchParams(location.search).get(
+          "string",
+        );
+        if (localLevelString != null) {
+          this._doSearchInner(0);
+        } else {
+          this._openLevelSelect();
+        }
       },
       () =>
         this._menuActive && !this._playBtnPressed && !this._levelSelectOverlay,
@@ -6881,10 +6888,11 @@ class xs extends Phaser.Scene {
       };
       const _doSearchInner = async (levelId) => {
         let loadFromUrl = false;
+
+        let localSongID = 0;
         let localLevelString = new URLSearchParams(location.search).get(
           "string",
         );
-        let localSongID = 0;
         if (localLevelString != null) {
           localLevelString = String(localLevelString);
           loadFromUrl = true;
@@ -6930,7 +6938,7 @@ class xs extends Phaser.Scene {
           }
         }
 
-        const gdMap = {};
+        let gdMap = {};
         if (loadFromUrl) {
           gdMap = {
             4: localLevelString,
