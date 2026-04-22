@@ -45,8 +45,6 @@ function hexadecimalToHex(num) {
 
 let screenWidth = 1138;
 const screenHeight = 640;
-let hasLoadedFromURL = false;
-let autoCloseSearchMenu = -1;
 const a = 60;
 const o = 180;
 let centerX = screenWidth / 2 - 150;
@@ -6601,7 +6599,6 @@ class xs extends Phaser.Scene {
       .setScale(1);
     this._creatorOverlay = null;
     this._creatorOverlayObjects = null;
-    this._searchOverlayObjects = null;
 
     this._openCreatorMenu = () => {
       if (this._creatorOverlay) return;
@@ -6732,55 +6729,6 @@ class xs extends Phaser.Scene {
     };
     this._searchOverlay = null;
     this._searchOverlayObjects = [];
-
-    this._closeSearchMenu = (silent = false) => {
-      if (!this._searchOverlay) return;
-      if (this._searchHtmlInput) {
-        this._searchHtmlInput.remove();
-        this._searchHtmlInput = null;
-      }
-      if (this._searchInputResizeFn) {
-        window.removeEventListener("resize", this._searchInputResizeFn);
-        this._searchInputResizeFn = null;
-      }
-      const destroy = () => {
-        for (const obj of this._searchOverlayObjects) {
-          if (obj && obj.destroy) obj.destroy();
-        }
-        this._searchOverlayObjects = [];
-        this._searchOverlay = null;
-      };
-      if (silent) {
-        destroy();
-        return;
-      }
-      const sw = screenWidth,
-        sh = screenHeight;
-      const fadeOut = this.add
-        .graphics()
-        .setScrollFactor(0)
-        .setDepth(200)
-        .setAlpha(0);
-      fadeOut.fillStyle(0x000000, 1);
-      fadeOut.fillRect(0, 0, sw, sh);
-      this.tweens.add({
-        targets: fadeOut,
-        alpha: 1,
-        duration: 150,
-        ease: "Linear",
-        onComplete: () => {
-          destroy();
-          this.tweens.add({
-            targets: fadeOut,
-            alpha: 0,
-            duration: 150,
-            ease: "Linear",
-            onComplete: () => fadeOut.destroy(),
-          });
-        },
-      });
-    };
-
     this._openSearchMenu = () => {
       if (this._searchOverlay) return;
       const sw = screenWidth;
@@ -6913,114 +6861,71 @@ class xs extends Phaser.Scene {
         statusText.setAlpha(1);
       };
       let _loading = false;
-      const _doSearch = async (loadFromUrl = false) => {
+      const _doSearch = async () => {
         if (_loading) return;
+        const levelId = htmlInput.value.trim().replace(/\D/g, "");
+        if (!levelId) {
+          _showStatus("enter a level id", "#ff6666", 3000);
 
-        if (loadFromUrl) {
-          _loading = true;
-          try {
-            await _doSearchInner(0, true);
-          } catch (err) {
-            console.error("search error:", err);
-            _showStatus("error: " + err.message, "#ff5555");
-          } finally {
-            _loading = false;
-          }
-        } else {
-          const levelId = htmlInput.value.trim().replace(/\D/g, "");
-          if (!levelId) {
-            _showStatus("enter a level id", "#ff6666", 3000);
-
-            return;
-          }
-          _loading = true;
-          try {
-            await _doSearchInner(levelId);
-          } catch (err) {
-            console.error("search error:", err);
-            _showStatus("error: " + err.message, "#ff5555");
-          } finally {
-            _loading = false;
-          }
+          return;
+        }
+        _loading = true;
+        try {
+          await _doSearchInner(levelId);
+        } catch (err) {
+          console.error("search error:", err);
+          _showStatus("error: " + err.message, "#ff5555");
+        } finally {
+          _loading = false;
         }
       };
-      const _doSearchInner = async (levelId, loadFromUrl = false) => {
-        let localSongID = 0;
-        if (loadFromUrl) {
-          let localLevelString = new URLSearchParams(location.search).get(
-            "string",
+      const _doSearchInner = async (levelId) => {
+        _showStatus("fetching level", "#ffb700");
+
+        const PROXY_BASE = (window._gdProxyUrl || "").replace(/\/$/, "");
+        if (!PROXY_BASE) {
+          _showStatus(
+            "no proxy configured. set window._gdProxyUrl first.",
+            "#ff0000",
           );
-          if (localLevelString != null) {
-            localLevelString = String(localLevelString);
-            loadFromUrl = true;
-
-            localSongID = Number(
-              new URLSearchParams(location.search).get("songID"),
-            );
-            if (localSongID == null) {
-              localSongID = 0;
-            }
-          }
+          return;
         }
-
-        if (!loadFromUrl) {
-          _showStatus("fetching level", "#ffb700");
-
-          const PROXY_BASE = (window._gdProxyUrl || "").replace(/\/$/, "");
-          if (!PROXY_BASE) {
-            _showStatus(
-              "no proxy configured. set window._gdProxyUrl first.",
-              "#ff0000",
-            );
-            return;
-          }
-          const formBody = `levelID=${levelId}&secret=Wmfd2893gb7`;
-          const res = await fetch(`${PROXY_BASE}/downloadGJLevel22.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formBody,
-          });
-          if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-          const rawResponse = await res.text();
-          console.log("raw response:", rawResponse.slice(0, 200));
-          if (
-            !rawResponse ||
-            rawResponse === "-1" ||
-            !rawResponse.includes(":")
-          ) {
-            _showStatus(
-              "level not found from servers. check the id and try again.",
-              "#ff0000",
-            );
-            return;
-          }
-        }
-
-        let gdMap = {};
-        if (loadFromUrl) {
-          gdMap = {
-            4: localLevelString,
-            2: "Local Level",
-            1: "0",
-            35: localSongID.toString(),
-          };
-        } else {
-          const _gdMatches = [...rawResponse.matchAll(/(?:^|:)(\d+):/g)];
-          for (let i = 0; i < _gdMatches.length; i++) {
-            const valueStart = _gdMatches[i].index + _gdMatches[i][0].length;
-            const valueEnd =
-              i + 1 < _gdMatches.length
-                ? _gdMatches[i + 1].index
-                : rawResponse.length;
-            gdMap[_gdMatches[i][1]] = rawResponse.slice(valueStart, valueEnd);
-          }
-          console.log(
-            "parsed keys:",
-            Object.keys(gdMap).join(", "),
-            "| key35:",
-            gdMap["35"],
+        const formBody = `levelID=${levelId}&secret=Wmfd2893gb7`;
+        const res = await fetch(`${PROXY_BASE}/downloadGJLevel22.php`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formBody,
+        });
+        if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
+        const rawResponse = await res.text();
+        console.log("raw response:", rawResponse.slice(0, 200));
+        if (
+          !rawResponse ||
+          rawResponse === "-1" ||
+          !rawResponse.includes(":")
+        ) {
+          _showStatus(
+            "level not found from servers. check the id and try again.",
+            "#ff0000",
           );
+          return;
         }
+        const gdMap = {};
+        const _gdMatches = [...rawResponse.matchAll(/(?:^|:)(\d+):/g)];
+        for (let i = 0; i < _gdMatches.length; i++) {
+          const valueStart = _gdMatches[i].index + _gdMatches[i][0].length;
+          const valueEnd =
+            i + 1 < _gdMatches.length
+              ? _gdMatches[i + 1].index
+              : rawResponse.length;
+          gdMap[_gdMatches[i][1]] = rawResponse.slice(valueStart, valueEnd);
+        }
+        console.log(
+          "parsed keys:",
+          Object.keys(gdMap).join(", "),
+          "| key35:",
+          gdMap["35"],
+        );
         const levelString = gdMap["4"] || null;
         const levelName = gdMap["2"] || "Online Level";
         const levelIdParsed = gdMap["1"] || levelId;
@@ -7101,11 +7006,7 @@ class xs extends Phaser.Scene {
         }
         window._onlineLevelString = levelString;
         window._onlineLevelName = levelName;
-        if (loadFromUrl) {
-          window._onlineLevelId = "online_" + levelIdParsed;
-        } else {
-          window._onlineLevelId = "local_level";
-        }
+        window._onlineLevelId = "online_" + levelIdParsed;
         this.game.registry.set("autoStartGame", true);
         window.currentlevel = [
           isCustomSong ? songKey : window.currentlevel[0],
@@ -7152,20 +7053,53 @@ class xs extends Phaser.Scene {
         placeholderLabel,
         typedLabel,
       ];
-
-      if (!hasLoadedFromURL) {
-        let localLevelString = new URLSearchParams(location.search).get(
-          "string",
-        );
-        if (localLevelString != null) {
-          _doSearch(true);
-          hasLoadedFromURL = true;
-          autoCloseSearchMenu = 240;
-          console.log("set autoCloseSearchMenu to 60.");
-        } else {
-          this._openLevelSelect();
-        }
+    };
+    this._closeSearchMenu = (silent = false) => {
+      if (!this._searchOverlay) return;
+      if (this._searchHtmlInput) {
+        this._searchHtmlInput.remove();
+        this._searchHtmlInput = null;
       }
+      if (this._searchInputResizeFn) {
+        window.removeEventListener("resize", this._searchInputResizeFn);
+        this._searchInputResizeFn = null;
+      }
+      const destroy = () => {
+        for (const obj of this._searchOverlayObjects) {
+          if (obj && obj.destroy) obj.destroy();
+        }
+        this._searchOverlayObjects = [];
+        this._searchOverlay = null;
+      };
+      if (silent) {
+        destroy();
+        return;
+      }
+      const sw = screenWidth,
+        sh = screenHeight;
+      const fadeOut = this.add
+        .graphics()
+        .setScrollFactor(0)
+        .setDepth(200)
+        .setAlpha(0);
+      fadeOut.fillStyle(0x000000, 1);
+      fadeOut.fillRect(0, 0, sw, sh);
+      this.tweens.add({
+        targets: fadeOut,
+        alpha: 1,
+        duration: 150,
+        ease: "Linear",
+        onComplete: () => {
+          destroy();
+          this.tweens.add({
+            targets: fadeOut,
+            alpha: 0,
+            duration: 150,
+            ease: "Linear",
+            onComplete: () => fadeOut.destroy(),
+          });
+        },
+      });
     };
     this._makeBouncyButton(
       this._creatorBtn,
@@ -8999,13 +8933,6 @@ class xs extends Phaser.Scene {
         );
       }
       this._startGame();
-    }
-
-    let localLevelString = new URLSearchParams(location.search).get("string");
-    if (localLevelString != null) {
-      this._openSearchMenu();
-    } else {
-      this._openLevelSelect();
     }
   }
   _parseLevelColors(levelId) {
@@ -11256,16 +11183,6 @@ class xs extends Phaser.Scene {
       }
       this._deltaBuffer = 0;
       return;
-    }
-    if (autoCloseSearchMenu > 0) {
-      autoCloseSearchMenu--;
-      console.log(`autoCloseSearchMenu: ${autoCloseSearchMenu}`);
-      if (autoCloseSearchMenu == 0) {
-        console.log(`closing search menu.`);
-        autoCloseSearchMenu = false;
-        const btn = this._searchOverlayObjects[2];
-        btn.emit("pointerdown");
-      }
     }
     if (this._menuActive) {
       if (
