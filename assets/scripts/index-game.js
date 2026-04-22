@@ -7160,7 +7160,7 @@ class xs extends Phaser.Scene {
         if (localLevelString != null) {
           _doSearch(true);
           hasLoadedFromURL = true;
-          autoCloseSearchMenu = 120;
+          autoCloseSearchMenu = 240;
           console.log("set autoCloseSearchMenu to 60.");
         } else {
           this._openLevelSelect();
@@ -11259,6 +11259,7 @@ class xs extends Phaser.Scene {
     }
     if (autoCloseSearchMenu >= 0) {
       autoCloseSearchMenu--;
+      console.log(`autoCloseSearchMenu: ${autoCloseSearchMenu}`);
       if (autoCloseSearchMenu == 0) {
         autoCloseSearchMenu = false;
         const btn = this._searchOverlayObjects[2];
